@@ -22,6 +22,18 @@ class WebUser(Model):
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
 
+    @classmethod
+    async def update_data_from_api(cls, uuid: str, email: str, password: str):  # or generate dict with params to be upd
+        if email and password:
+            await WebUser.filter(uuid=uuid).update(email=email, password=password)
+            return {'email': email, 'password': password}
+        elif email:
+            await WebUser.filter(uuid=uuid).update(email=email)
+            return {'email': email}
+        elif password:
+            await WebUser.filter(uuid=uuid).update(password=password)
+            return {'password': password}
+
 
 class Seller(Model):
     class Meta:
@@ -54,6 +66,18 @@ class WebShop(Model):
     name = fields.TextField()
     bot_id = fields.BigIntField(unique=True)  # get from bot_manager
 
+    @classmethod
+    async def update_data_from_api(cls, uuid: str, name: str, bot_id: int):  # or generate dict with params to be upd
+        if name and bot_id:
+            await WebUser.filter(uuid=uuid).update(name=name, bot_id=bot_id)
+            return {'name': name, 'bot_id': bot_id}
+        elif name:
+            await WebUser.filter(uuid=uuid).update(name=name)
+            return {'name': name}
+        elif bot_id:
+            await WebUser.filter(uuid=uuid).update(bot_id=bot_id)
+            return {'bot_id': bot_id}
+
 
 class Product(Model):
     class Meta:
@@ -61,7 +85,7 @@ class Product(Model):
 
     uuid = fields.UUIDField(pk=True)
     web_shop = fields.ForeignKeyField(model_name='models.WebShop', to_field='uuid')
-    article = fields.CharField(max_length=255)
+    article = fields.CharField(max_length=255, null=True)
     name = fields.TextField(null=True)
     description = fields.CharField(max_length=4096)
     discount_percent = fields.FloatField(default=0)

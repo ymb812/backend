@@ -2,8 +2,8 @@ from typing import Union
 from pydantic import BaseModel
 
 
-class TelegramConfigsModel(BaseModel):
-    TELEGRAM_BOT_TOKEN: Union[str]
+class APIConfigsModel(BaseModel):
+    AUTH_TOKEN: Union[str]
 
 
 class DataBaseConfigsModel(BaseModel):
@@ -14,5 +14,5 @@ class DataBaseConfigsModel(BaseModel):
     DB_NAME: Union[str]
 
 
-class EnvConfigsModel(TelegramConfigsModel, DataBaseConfigsModel):
+class EnvConfigsModel(APIConfigsModel, DataBaseConfigsModel):
     pass
