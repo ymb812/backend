@@ -20,9 +20,10 @@ logger = logging.getLogger(__name__)
 @router.post('/product', status_code=status.HTTP_201_CREATED)
 async def create_product(body: ProductModel):
     try:
-        await Product.create(uuid=body.uuid, web_shop=body.web_shop, article=body.article, name=body.name,
+        await Product.create(uuid=body.uuid, web_shop_id=body.web_shop_uuid, article=body.article, name=body.name,
                              description=body.description, discount_percent=body.discount_percent,
-                             category=body.category, media_data=body.media_data, order_priority=body.order_priority)
+                             category_id=body.category_uuid, media_data=body.media_data,
+                             order_priority=body.order_priority)
     except Exception as e:
         logger.error(f'Cannot create Product via /product with uuid={body.uuid}', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -44,9 +45,16 @@ async def delete_product(uuid: str):
 
 
 # update product data
-@router.put('/delete_product/{uuid}', status_code=status.HTTP_200_OK)
-async def update_delete_product(uuid: str, body: ProductToBeUpdatedModel):
-    pass
+@router.put('/product/{uuid}', status_code=status.HTTP_200_OK)
+async def update_product(uuid: str, body: ProductToBeUpdatedModel):
+    try:
+        product = await Product.get(uuid=uuid)
+        await product.update_fields(updated_fields=body)
+    except Exception as e:
+        logger.error(f'Cannot update Product with uuid={uuid}', exc_info=e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='')
+
+    return {'uuid': uuid, 'status': 'Product updated successfully.', 'updatedProperties': body.model_dump()}
 
 
 # get product data

@@ -1,5 +1,6 @@
 from tortoise import fields
 from tortoise.models import Model
+from core.webhooks.models import ProductToBeUpdatedModel, WebShopToBeUpdatedModel, WebUserToBeUpdatedModel
 
 
 class Client(Model):
@@ -22,18 +23,12 @@ class WebUser(Model):
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
 
-    @classmethod
-    async def update_data_from_api(cls, uuid: str, email: str, password: str):  # or generate dict with params to be upd
-        if email and password:
-            await WebUser.filter(uuid=uuid).update(email=email, password=password)
-            return {'email': email, 'password': password}
-        elif email:
-            await WebUser.filter(uuid=uuid).update(email=email)
-            return {'email': email}
-        elif password:
-            await WebUser.filter(uuid=uuid).update(password=password)
-            return {'password': password}
+    async def update_fields(self, updated_fields: WebUserToBeUpdatedModel):
+        for field, value in updated_fields.model_dump().items():
+            if value is not None:
+                setattr(self, field, value)
 
+        await self.save()
 
 class Seller(Model):
     class Meta:
@@ -65,18 +60,15 @@ class WebShop(Model):
     uuid = fields.UUIDField(pk=True)
     name = fields.TextField()
     bot_id = fields.BigIntField(unique=True)  # get from bot_manager
+    created_at = fields.DatetimeField(auto_now_add=True)
+    updated_at = fields.DatetimeField(auto_now=True)
 
-    @classmethod
-    async def update_data_from_api(cls, uuid: str, name: str, bot_id: int):  # or generate dict with params to be upd
-        if name and bot_id:
-            await WebUser.filter(uuid=uuid).update(name=name, bot_id=bot_id)
-            return {'name': name, 'bot_id': bot_id}
-        elif name:
-            await WebUser.filter(uuid=uuid).update(name=name)
-            return {'name': name}
-        elif bot_id:
-            await WebUser.filter(uuid=uuid).update(bot_id=bot_id)
-            return {'bot_id': bot_id}
+    async def update_fields(self, updated_fields: WebShopToBeUpdatedModel):
+        for field, value in updated_fields.model_dump().items():
+            if value is not None:
+                setattr(self, field, value)
+
+        await self.save()
 
 
 class Product(Model):
@@ -92,6 +84,13 @@ class Product(Model):
     category = fields.ForeignKeyField(model_name='models.Category', to_field='uuid')
     media_data = fields.TextField(null=True)
     order_priority = fields.BigIntField(default=0)
+
+    async def update_fields(self, updated_fields: ProductToBeUpdatedModel):
+        for field, value in updated_fields.model_dump().items():
+            if value is not None:
+                setattr(self, field, value)
+
+        await self.save()
 
 
 class Category(Model):
@@ -200,4 +199,4 @@ class Mailing(Model):
     inline_text = fields.TextField()
     inline_link = fields.TextField(null=True)
     starts_at = fields.DatetimeField()
-    ends_at = fields.DatetimeField(null=True)  # when mailing ends we set as datetime.now() 
+    ends_at = fields.DatetimeField(null=True)  # when mailing ends we set as datetime.now()

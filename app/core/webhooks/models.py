@@ -1,16 +1,17 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+
 
 
 # main user model
 class WebUserModel(BaseModel):
     uuid: str
-    email: str
+    email: EmailStr
     password: str
 
 
 # user put request
 class WebUserToBeUpdatedModel(BaseModel):
-    email: str | None
+    email: EmailStr | None
     password: str | None
 
 
@@ -40,10 +41,10 @@ class ProductModel(BaseModel):
     article: str | None
     name: str | None
     description: str
-    discount_percent: float = 0
+    discount_percent: float | None
     category_uuid: str
     media_data: str | None
-    order_priority: int = 0
+    order_priority: int | None
 
 
 # product put request - how to do it better?

@@ -3,7 +3,7 @@ import os
 import sys
 
 from dotenv import load_dotenv
-from pydantic.error_wrappers import ValidationError
+from pydantic import ValidationError
 
 from configs.env_configs_models import EnvConfigsModel
 

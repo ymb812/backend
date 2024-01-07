@@ -49,12 +49,13 @@ async def delete_shop(uuid: str):
 @router.put('/shop/{uuid}', status_code=status.HTTP_200_OK)
 async def update_shop(uuid: str, body: WebShopToBeUpdatedModel):
     try:
-        updated_data = await WebShop.update_data_from_api(uuid=uuid, name=body.name, bot_id=body.bot_id)
+        shop = await WebShop.get(uuid=uuid)
+        await shop.update_fields(updated_fields=body)
     except Exception as e:
-        logger.error(f'Cannot update WebShop with uuid={body.uuid}', exc_info=e)
+        logger.error(f'Cannot update WebShop with uuid={uuid}', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='')
 
-    return {'uuid': uuid, 'status': 'Shop updated successfully.', 'updatedProperties': updated_data}
+    return {'uuid': uuid, 'status': 'Shop updated successfully.', 'updatedProperties': body.model_dump()}
 
 
 # get shop data

@@ -45,12 +45,13 @@ async def delete_user(uuid: str):
 @router.put('/user/{uuid}', status_code=status.HTTP_200_OK)
 async def update_user(uuid: str, body: WebUserToBeUpdatedModel):
     try:
-        updated_data = await WebUser.update_data_from_api(uuid=uuid, email=body.email, password=body.password)
+        user = await WebUser.get(uuid=uuid)
+        await user.update_fields(updated_fields=body)
     except Exception as e:
-        logger.error(f'Cannot update WebUser with uuid={body.uuid}', exc_info=e)
+        logger.error(f'Cannot update WebUser with uuid={uuid}', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='')
 
-    return {'uuid': uuid, 'status': 'User updated successfully.', 'updatedProperties': updated_data}
+    return {'uuid': uuid, 'status': 'User updated successfully.', 'updatedProperties': body.model_dump()}
 
 
 # get user data
