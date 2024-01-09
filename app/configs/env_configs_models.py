@@ -1,18 +1,26 @@
-from typing import Union
 from pydantic import BaseModel
 
 
+class APPSettings(BaseModel):
+    DEBUG: bool
+
+
 class APIConfigsModel(BaseModel):
-    AUTH_TOKEN: Union[str]
+    X_AUTH_TOKEN: str
 
 
 class DataBaseConfigsModel(BaseModel):
-    DB_USERNAME: Union[str]
-    DB_PASSWORD: Union[str]
-    DB_HOST: Union[str]
-    DB_PORT: Union[int]
-    DB_NAME: Union[str]
+    DB_USERNAME: str
+    DB_PASSWORD: str
+    DB_HOST: str
+    DB_PORT: int
+    DB_NAME: str
 
 
-class EnvConfigsModel(APIConfigsModel, DataBaseConfigsModel):
+class RestAPISettings(BaseModel):
+    REST_HOST: str
+    REST_PORT: int
+
+
+class EnvConfigsModel(APPSettings, APIConfigsModel, DataBaseConfigsModel, RestAPISettings):
     pass

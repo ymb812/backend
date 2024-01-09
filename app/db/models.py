@@ -1,6 +1,8 @@
 from tortoise import fields
 from tortoise.models import Model
-from core.webhooks.models import ProductToBeUpdatedModel, WebShopToBeUpdatedModel, WebUserToBeUpdatedModel
+import api.schemas.v1.web_user as v1_web_user
+import api.schemas.v1.web_shop as v1_web_shop
+import api.schemas.v1.product as v1_product
 
 
 class Client(Model):
@@ -23,7 +25,7 @@ class WebUser(Model):
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
 
-    async def update_fields(self, updated_fields: WebUserToBeUpdatedModel):
+    async def update_fields(self, updated_fields: v1_web_user.WebUserToBeUpdatedModel):
         for field, value in updated_fields.model_dump().items():
             if value is not None:
                 setattr(self, field, value)
@@ -63,7 +65,7 @@ class WebShop(Model):
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
 
-    async def update_fields(self, updated_fields: WebShopToBeUpdatedModel):
+    async def update_fields(self, updated_fields: v1_web_shop.WebShopToBeUpdatedModel):
         for field, value in updated_fields.model_dump().items():
             if value is not None:
                 setattr(self, field, value)
@@ -85,7 +87,7 @@ class Product(Model):
     media_data = fields.TextField(null=True)
     order_priority = fields.BigIntField(default=0)
 
-    async def update_fields(self, updated_fields: ProductToBeUpdatedModel):
+    async def update_fields(self, updated_fields: v1_product.ProductToBeUpdatedModel):
         for field, value in updated_fields.model_dump().items():
             if value is not None:
                 setattr(self, field, value)

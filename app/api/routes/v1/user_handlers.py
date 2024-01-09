@@ -1,13 +1,13 @@
 import logging
 from fastapi import APIRouter, HTTPException, Header, Depends, status
-from core.webhooks.models import WebUserModel, WebUserToBeUpdatedModel
-from core.db.models import WebUser
+from api.schemas.v1.web_user import WebUserModel, WebUserToBeUpdatedModel
+from db.models import WebUser
 from configs.settings import env_parameters
 
 
 # auth header
-def authorize_user(auth_token: str = Header(None)):
-    if auth_token != env_parameters.AUTH_TOKEN:
+def authorize_user(X_AUTH_TOKEN: str = Header(None)):
+    if X_AUTH_TOKEN != env_parameters.X_AUTH_TOKEN:
         raise HTTPException(status_code=401, detail='Unauthorized')
     return True
 
