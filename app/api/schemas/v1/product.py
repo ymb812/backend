@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-# product model
+# post request
 class ProductModel(BaseModel):
     uuid: str
     web_shop_uuid: str
@@ -14,6 +14,7 @@ class ProductModel(BaseModel):
     order_priority: int | None
 
 
+# put request
 class ProductToBeUpdatedModel(BaseModel):
     article: str | None
     name: str | None

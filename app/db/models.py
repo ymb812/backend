@@ -73,9 +73,23 @@ class WebShop(Model):
         await self.save()
 
 
+class UserShopAccess(Model):
+    class Meta:
+        table = 'users_shops_access'
+
+    web_user = fields.ForeignKeyField(model_name='models.WebUser', to_field='uuid')
+    web_shop = fields.ForeignKeyField(model_name='models.WebShop', to_field='uuid')
+    status = fields.CharField(max_length=32, null=True)  # for future shop moders for example
+
+    @classmethod
+    async def create_user_shop_access(cls, web_user_uuid: str, web_shop_uuid: str, status: str | None = None):
+        await cls.create(web_user=web_user_uuid, web_shop=web_shop_uuid, status=status)
+
+
 class Product(Model):
     class Meta:
         table = 'products'
+        ordering = ['created_at']
 
     uuid = fields.UUIDField(pk=True)
     web_shop = fields.ForeignKeyField(model_name='models.WebShop', to_field='uuid')
@@ -86,6 +100,8 @@ class Product(Model):
     category = fields.ForeignKeyField(model_name='models.Category', to_field='uuid')
     media_data = fields.TextField(null=True)
     order_priority = fields.BigIntField(default=0)
+    created_at = fields.DatetimeField(auto_now_add=True)
+    updated_at = fields.DatetimeField(auto_now=True)
 
     async def update_fields(self, updated_fields: v1_product.ProductToBeUpdatedModel):
         for field, value in updated_fields.model_dump().items():
