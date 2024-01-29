@@ -67,3 +67,21 @@ async def get_product(uuid: str):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Check the uuid')
 
     return product
+
+
+# get all products by shop
+@router.get('/products/{shop_uuid}', status_code=status.HTTP_200_OK)
+async def get_products_by_shop(shop_uuid: str, page: int | None = None):
+    try:
+        if page:
+            limit = env_parameters.ITEMS_PER_PAGE
+            products = await Product.filter(
+                web_shop_id=shop_uuid).offset((page - 1) * limit).limit(limit).all().values()
+        else:
+            products = await Product.filter(web_shop_id=shop_uuid).all().values()
+
+    except Exception as e:
+        logger.error(f'Cannot get Products by shop_uuid={shop_uuid}', exc_info=e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Check the uuid')
+
+    return {'products': products, 'page': page}
