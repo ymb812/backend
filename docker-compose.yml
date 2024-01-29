@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  backend_db:
+    image: "postgres:13"
+    container_name: backend_db
+    restart: "always"
+    env_file: postgres_db/.env
+    ports:
+      - "5437:5432"
+    networks:
+      - backend_db_network
+    volumes:
+      - ./postgresql/data:/var/lib/postgresql/data
+
+  backend_api:
+    build: .
+    container_name: backend_api
+    restart: "always"
+    networks:
+      - backend_db_network
+    depends_on:
+      - backend_db
+    environment:
+      PROD_MODE: 1
+    env_file:
+      - configs/.env
+
+networks:
+  backend_db_network:
+    driver: bridge
