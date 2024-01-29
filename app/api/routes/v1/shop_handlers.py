@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 # create new user
 @router.post('/shop', status_code=status.HTTP_201_CREATED)
-async def create_shop(body: WebShopModel):
+async def create_shop(user_uuid: str, body: WebShopModel):
     try:
         await WebShop.create(uuid=body.uuid, name=body.name, bot_id=body.bot_id)
 
@@ -35,7 +35,7 @@ async def create_shop(body: WebShopModel):
 
 # delete shop
 @router.delete('/shop/{uuid}', status_code=status.HTTP_200_OK)
-async def delete_shop(uuid: str):
+async def delete_shop(user_uuid: str, uuid: str):
     try:
         await WebShop.filter(uuid=uuid).delete()
     except Exception as e:
@@ -47,7 +47,7 @@ async def delete_shop(uuid: str):
 
 # update shop data
 @router.put('/shop/{uuid}', status_code=status.HTTP_200_OK)
-async def update_shop(uuid: str, body: WebShopToBeUpdatedModel):
+async def update_shop(user_uuid: str, uuid: str, body: WebShopToBeUpdatedModel):
     try:
         shop = await WebShop.get(uuid=uuid)
         await shop.update_fields(updated_fields=body)
@@ -60,7 +60,7 @@ async def update_shop(uuid: str, body: WebShopToBeUpdatedModel):
 
 # get shop data
 @router.get('/shop/{uuid}', status_code=status.HTTP_200_OK)
-async def get_shop(uuid: str):
+async def get_shop(user_uuid: str, uuid: str):
     try:
         shop = await WebShop.filter(uuid=uuid).first().values()
     except Exception as e:
@@ -72,5 +72,5 @@ async def get_shop(uuid: str):
 
 # update shop static content
 @router.put('/shop/static', status_code=status.HTTP_200_OK)
-async def update_shop_static_content(uuid: str, body: WebShopStaticContentModel):
+async def update_shop_static_content(user_uuid: str, uuid: str, body: WebShopStaticContentModel):
     pass

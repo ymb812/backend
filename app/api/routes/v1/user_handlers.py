@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 @router.post('/user', status_code=status.HTTP_201_CREATED)
 async def create_user(body: WebUserModel):
     try:
-        await WebUser.create(uuid=body.uuid, email=body.email, password=body.password)
+        await WebUser.create(uuid=body.uuid, email=body.email)
     except Exception as e:
         logger.error(f'Cannot create WebUser via /user with uuid={body.uuid}', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 # create new product
 @router.post('/product', status_code=status.HTTP_201_CREATED)
-async def create_product(body: ProductModel):
+async def create_product(user_uuid: str, body: ProductModel):
     try:
         await Product.create(uuid=body.uuid, web_shop_id=body.web_shop_uuid, article=body.article, name=body.name,
                              description=body.description, discount_percent=body.discount_percent,
@@ -34,7 +34,7 @@ async def create_product(body: ProductModel):
 
 # delete product
 @router.delete('/product/{uuid}', status_code=status.HTTP_200_OK)
-async def delete_product(uuid: str):
+async def delete_product(uuid: str, user_uuid: str):
     try:
         await Product.filter(uuid=uuid).delete()
     except Exception as e:
@@ -46,7 +46,7 @@ async def delete_product(uuid: str):
 
 # update product data
 @router.put('/product/{uuid}', status_code=status.HTTP_200_OK)
-async def update_product(uuid: str, body: ProductToBeUpdatedModel):
+async def update_product(uuid: str, user_uuid: str, body: ProductToBeUpdatedModel):
     try:
         product = await Product.get(uuid=uuid)
         await product.update_fields(updated_fields=body)
@@ -59,7 +59,7 @@ async def update_product(uuid: str, body: ProductToBeUpdatedModel):
 
 # get product data
 @router.get('/product/{uuid}', status_code=status.HTTP_200_OK)
-async def get_product(uuid: str):
+async def get_product(uuid: str, user_uuid: str):
     try:
         product = await Product.filter(uuid=uuid).first().values()
     except Exception as e:
@@ -71,7 +71,7 @@ async def get_product(uuid: str):
 
 # get all products by shop
 @router.get('/products/{shop_uuid}', status_code=status.HTTP_200_OK)
-async def get_products_by_shop(shop_uuid: str, page: int | None = None):
+async def get_products_by_shop(shop_uuid: str, user_uuid: str, page: int | None = None):
     try:
         if page:
             limit = env_parameters.ITEMS_PER_PAGE

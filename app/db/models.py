@@ -21,7 +21,7 @@ class WebUser(Model):
 
     uuid = fields.UUIDField(pk=True)
     email = fields.CharField(unique=True, max_length=255)
-    password = fields.TextField()
+    password = fields.TextField()  # TODO: to be deleted
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
 
