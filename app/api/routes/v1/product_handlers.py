@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 # create new product
-@router.post('/product', status_code=status.HTTP_201_CREATED)
+@router.post('/', status_code=status.HTTP_201_CREATED)
 async def create_product(user_uuid: str, body: ProductModel):
     try:
         await Product.create(uuid=body.uuid, web_shop_id=body.web_shop_uuid, article=body.article, name=body.name,
@@ -33,7 +33,7 @@ async def create_product(user_uuid: str, body: ProductModel):
 
 
 # delete product
-@router.delete('/product/{uuid}', status_code=status.HTTP_200_OK)
+@router.delete('/{uuid}', status_code=status.HTTP_200_OK)
 async def delete_product(uuid: str, user_uuid: str):
     try:
         await Product.filter(uuid=uuid).delete()
@@ -45,7 +45,7 @@ async def delete_product(uuid: str, user_uuid: str):
 
 
 # update product data
-@router.put('/product/{uuid}', status_code=status.HTTP_200_OK)
+@router.patch('/{uuid}', status_code=status.HTTP_200_OK)
 async def update_product(uuid: str, user_uuid: str, body: ProductToBeUpdatedModel):
     try:
         product = await Product.get(uuid=uuid)
@@ -58,7 +58,7 @@ async def update_product(uuid: str, user_uuid: str, body: ProductToBeUpdatedMode
 
 
 # get product data
-@router.get('/product/{uuid}', status_code=status.HTTP_200_OK)
+@router.get('/{uuid}', status_code=status.HTTP_200_OK)
 async def get_product(uuid: str, user_uuid: str):
     try:
         product = await Product.filter(uuid=uuid).first().values()
@@ -70,7 +70,7 @@ async def get_product(uuid: str, user_uuid: str):
 
 
 # get all products by shop
-@router.get('/products/{shop_uuid}', status_code=status.HTTP_200_OK)
+@router.get('/all_products_by_shop/{shop_uuid}', status_code=status.HTTP_200_OK)
 async def get_products_by_shop(shop_uuid: str, user_uuid: str, page: int | None = None):
     try:
         if page:

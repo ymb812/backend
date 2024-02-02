@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 # create new user
-@router.post('/user', status_code=status.HTTP_201_CREATED)
+@router.post('/', status_code=status.HTTP_201_CREATED)
 async def create_user(body: WebUserModel):
     try:
         await WebUser.create(uuid=body.uuid, email=body.email)
@@ -30,7 +30,7 @@ async def create_user(body: WebUserModel):
 
 
 # delete user
-@router.delete('/user/{uuid}', status_code=status.HTTP_200_OK)
+@router.delete('/{uuid}', status_code=status.HTTP_200_OK)
 async def delete_user(uuid: str):
     try:
         await WebUser.filter(uuid=uuid).delete()
@@ -42,7 +42,7 @@ async def delete_user(uuid: str):
 
 
 # update user data
-@router.put('/user/{uuid}', status_code=status.HTTP_200_OK)
+@router.put('/{uuid}', status_code=status.HTTP_200_OK)
 async def update_user(uuid: str, body: WebUserToBeUpdatedModel):
     try:
         user = await WebUser.get(uuid=uuid)
@@ -55,7 +55,7 @@ async def update_user(uuid: str, body: WebUserToBeUpdatedModel):
 
 
 # get user data
-@router.get('/user/{uuid}', status_code=status.HTTP_200_OK)
+@router.get('/{uuid}', status_code=status.HTTP_200_OK)
 async def get_user(uuid: str):
     try:
         user = await WebUser.filter(uuid=uuid).first().values()
