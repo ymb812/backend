@@ -5,12 +5,11 @@ from pydantic import BaseModel, UUID4
 # post request
 class WebShopModel:
     class Request(BaseModel):
-        uuid: str
         name: str
         bot_id: int
 
     class Response(BaseModel):
-        uuid: str
+        uuid: UUID4
         status: str
 
 
@@ -42,7 +41,7 @@ class WebShopFromDBModel:
 class WebShopStaticContentModel:
     # to be added
     class Request(BaseModel):
-        uuid: str
+        uuid: UUID4
 
     class Response(BaseModel):
         pass

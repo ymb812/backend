@@ -1,4 +1,5 @@
 import logging
+from uuid import uuid4
 from fastapi import APIRouter, HTTPException, Header, Depends, status
 from api.schemas.v1.product import ProductModel, ProductToBeUpdatedModel, ProductFromDBModel, ProductsByShopModel
 from db.models import Product
@@ -20,23 +21,25 @@ logger = logging.getLogger(__name__)
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=ProductModel.Response)
 async def create_product(user_uuid: str, body: ProductModel.Request):
     try:
-        await Product.create(uuid=body.uuid, web_shop_id=body.web_shop_uuid, article=body.article, name=body.name,
+        product_uuid = uuid4()
+        await Product.create(uuid=product_uuid, web_shop_id=body.web_shop_uuid, article=body.article, name=body.name,
                              description=body.description, discount_percent=body.discount_percent,
                              category_id=body.category_uuid, media_data=body.media_data,
                              order_priority=body.order_priority)
     except Exception as e:
-        logger.error(f'Cannot create Product via /product with uuid={body.uuid}', exc_info=e)
+        logger.error(f'Cannot create Product via /product', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail='Product is not unique or types are wrong')
 
-    return {'uuid': body.uuid, 'status': 'Product created successfully.'}
+    return {'uuid': product_uuid, 'status': 'Product created successfully.'}
 
 
 # delete product
 @router.delete('/{uuid}', status_code=status.HTTP_200_OK, response_model=ProductModel.Response)
 async def delete_product(uuid: str, user_uuid: str):
     try:
-        await Product.filter(uuid=uuid).delete()
+        if not await Product.filter(uuid=uuid).delete():
+            return {'uuid': uuid, 'status': 'Product does not exist.'}
     except Exception as e:
         logger.error(f'Cannot delete Product via /product with uuid={uuid}', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='')
@@ -60,7 +63,8 @@ async def update_product(uuid: str, user_uuid: str, body: ProductToBeUpdatedMode
 
 
 # get product data
-@router.get('/{uuid}', status_code=status.HTTP_200_OK, response_model=ProductFromDBModel.Response)
+@router.get('/{uuid}', status_code=status.HTTP_200_OK, response_model=ProductFromDBModel.Response,
+            responses={404: {'description': 'Product does not exist'}})
 async def get_product(uuid: str, user_uuid: str):
     try:
         product = await Product.filter(uuid=uuid).first().values()
@@ -68,23 +72,25 @@ async def get_product(uuid: str, user_uuid: str):
         logger.error(f'Cannot get Product with uuid={uuid}', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Check the uuid')
 
+    if product is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Product does not exist')
+
     return product
 
 
 # get all products by shop
 @router.get('/all_products_by_shop/{shop_uuid}', status_code=status.HTTP_200_OK,
             response_model=ProductsByShopModel.Response)
-async def get_products_by_shop(shop_uuid: str, user_uuid: str, page: int | None = None):
+async def get_products_by_shop(shop_uuid: str, user_uuid: str, offset: int = 0, limit: int | None = None):
     try:
-        if page:
-            limit = env_parameters.ITEMS_PER_PAGE
+        if limit is not None:
             products = await Product.filter(
-                web_shop_id=shop_uuid).offset((page - 1) * limit).limit(limit).all().values()
+                web_shop_id=shop_uuid).offset(offset).limit(limit).all().values()
         else:
-            products = await Product.filter(web_shop_id=shop_uuid).all().values()
+            products = await Product.filter(web_shop_id=shop_uuid).offset(offset).all().values()
 
     except Exception as e:
         logger.error(f'Cannot get Products by shop_uuid={shop_uuid}', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Check the uuid')
 
-    return {'products': products, 'page': page}
+    return {'amount': len(products), 'products': products}

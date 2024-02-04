@@ -5,11 +5,10 @@ from pydantic import BaseModel, EmailStr, UUID4
 # post request
 class WebUserModel:
     class Request(BaseModel):
-        uuid: str
         email: EmailStr
 
     class Response(BaseModel):
-        uuid: str
+        uuid: UUID4
         status: str
 
 

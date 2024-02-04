@@ -1,4 +1,5 @@
 import logging
+from uuid import uuid4
 from fastapi import APIRouter, HTTPException, Header, Depends, status
 from api.schemas.v1.web_user import WebUserModel, WebUserToBeUpdatedModel, WebUserFromDBModel
 from db.models import WebUser
@@ -20,13 +21,14 @@ logger = logging.getLogger(__name__)
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=WebUserModel.Response)
 async def create_user(body: WebUserModel.Request):
     try:
-        await WebUser.create(uuid=body.uuid, email=body.email)
+        user_uuid = uuid4()
+        await WebUser.create(uuid=user_uuid, email=body.email)
     except Exception as e:
-        logger.error(f'Cannot create WebUser via /user with uuid={body.uuid}', exc_info=e)
+        logger.error(f'Cannot create WebUser via /user', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail='User is not unique or types are wrong')
 
-    return {'uuid': body.uuid, 'status': 'User created successfully.'}
+    return {'uuid': user_uuid, 'status': 'User created successfully.'}
 
 
 # delete user
@@ -57,12 +59,16 @@ async def update_user(uuid: str, body: WebUserToBeUpdatedModel.Request):
 
 
 # get user data
-@router.get('/{uuid}', status_code=status.HTTP_200_OK, response_model=WebUserFromDBModel.Response)
+@router.get('/{uuid}', status_code=status.HTTP_200_OK, response_model=WebUserFromDBModel.Response,
+            responses={404: {'description': 'User does not exist'}})
 async def get_user(uuid: str):
     try:
         user = await WebUser.filter(uuid=uuid).first().values()
     except Exception as e:
         logger.error(f'Cannot get WebUser via with uuid={uuid}', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Check the uuid')
+
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User does not exist')
 
     return user

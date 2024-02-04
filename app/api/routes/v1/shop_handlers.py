@@ -1,4 +1,5 @@
 import logging
+from uuid import uuid4
 from fastapi import APIRouter, HTTPException, Header, Depends, status
 from api.schemas.v1.web_shop import WebShopModel, WebShopToBeUpdatedModel, WebShopStaticContentModel, WebShopFromDBModel
 from db.models import WebShop
@@ -20,17 +21,18 @@ logger = logging.getLogger(__name__)
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=WebShopModel.Response)
 async def create_shop(user_uuid: str, body: WebShopModel.Request):
     try:
-        await WebShop.create(uuid=body.uuid, name=body.name, bot_id=body.bot_id)
+        webshop_uuid = uuid4()
+        await WebShop.create(uuid=webshop_uuid, name=body.name, bot_id=body.bot_id)
 
         # here get bot_token from bot_manager
         bot_token = 'will_be_received_from_bot_manager'
 
     except Exception as e:
-        logger.error(f'Cannot create WebShop via /shop with uuid={body.uuid}', exc_info=e)
+        logger.error(f'Cannot create WebShop via /shop', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail='Shop is not unique or types are wrong')
 
-    return {'uuid': body.uuid, 'status': 'Shop created successfully.'}
+    return {'uuid': webshop_uuid, 'status': 'Shop created successfully.'}
 
 
 # delete shop
@@ -61,13 +63,17 @@ async def update_shop(user_uuid: str, uuid: str, body: WebShopToBeUpdatedModel.R
 
 
 # get shop data
-@router.get('/{uuid}', status_code=status.HTTP_200_OK, response_model=WebShopFromDBModel.Response)
+@router.get('/{uuid}', status_code=status.HTTP_200_OK, response_model=WebShopFromDBModel.Response,
+            responses={404: {'description': 'Shop does not exist'}})
 async def get_shop(user_uuid: str, uuid: str):
     try:
         shop = await WebShop.filter(uuid=uuid).first().values()
     except Exception as e:
         logger.error(f'Cannot get WebShop with uuid={uuid}', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Check the uuid')
+
+    if shop is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Shop does not exist')
 
     return shop
 

@@ -7,7 +7,6 @@ class APPSettings(BaseModel):
 
 class APIConfigsModel(BaseModel):
     X_AUTH_TOKEN: str
-    ITEMS_PER_PAGE: int
 
 
 class DataBaseConfigsModel(BaseModel):

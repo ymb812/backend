@@ -6,18 +6,17 @@ from typing import List
 # post request
 class ProductModel:
     class Request(BaseModel):
-        uuid: str
-        web_shop_uuid: str
+        web_shop_uuid: UUID4
         article: str | None = None
         name: str | None = None
         description: str
         discount_percent: float | None = None
-        category_uuid: str
+        category_uuid: UUID4
         media_data: str | None = None
         order_priority: int | None = None
 
     class Response(BaseModel):
-        uuid: str
+        uuid: UUID4
         status: str
 
 
@@ -26,7 +25,7 @@ class ProductToBeUpdatedInfoModel(BaseModel):
     name: str | None = None
     description: str | None = None
     discount_percent: float | None = None
-    category_uuid: str | None = None
+    category_uuid: UUID4 | None = None
     media_data: str | None = None
     order_priority: int | None = None
 
@@ -58,5 +57,5 @@ class ProductFromDBModel:
 
 class ProductsByShopModel:
     class Response(BaseModel):
+        amount: int
         products: List[ProductFromDBModel.Response]
-        page: int
