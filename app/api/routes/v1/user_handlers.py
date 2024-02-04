@@ -1,6 +1,6 @@
 import logging
 from fastapi import APIRouter, HTTPException, Header, Depends, status
-from api.schemas.v1.web_user import WebUserModel, WebUserToBeUpdatedModel
+from api.schemas.v1.web_user import WebUserModel, WebUserToBeUpdatedModel, WebUserFromDBModel
 from db.models import WebUser
 from configs.settings import env_parameters
 
@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 # create new user
-@router.post('/', status_code=status.HTTP_201_CREATED)
-async def create_user(body: WebUserModel):
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=WebUserModel.Response)
+async def create_user(body: WebUserModel.Request):
     try:
         await WebUser.create(uuid=body.uuid, email=body.email)
     except Exception as e:
@@ -30,7 +30,7 @@ async def create_user(body: WebUserModel):
 
 
 # delete user
-@router.delete('/{uuid}', status_code=status.HTTP_200_OK)
+@router.delete('/{uuid}', status_code=status.HTTP_200_OK, response_model=WebUserModel.Response)
 async def delete_user(uuid: str):
     try:
         await WebUser.filter(uuid=uuid).delete()
@@ -42,8 +42,10 @@ async def delete_user(uuid: str):
 
 
 # update user data
-@router.put('/{uuid}', status_code=status.HTTP_200_OK)
-async def update_user(uuid: str, body: WebUserToBeUpdatedModel):
+@router.put('/{uuid}', status_code=status.HTTP_200_OK, response_model=WebUserToBeUpdatedModel.Response,
+            responses={200: {'description': 'Successful Response. '
+                                            'If field in updatedProperties is None, then it may not be updated'}})
+async def update_user(uuid: str, body: WebUserToBeUpdatedModel.Request):
     try:
         user = await WebUser.get(uuid=uuid)
         await user.update_fields(updated_fields=body)
@@ -55,7 +57,7 @@ async def update_user(uuid: str, body: WebUserToBeUpdatedModel):
 
 
 # get user data
-@router.get('/{uuid}', status_code=status.HTTP_200_OK)
+@router.get('/{uuid}', status_code=status.HTTP_200_OK, response_model=WebUserFromDBModel.Response)
 async def get_user(uuid: str):
     try:
         user = await WebUser.filter(uuid=uuid).first().values()

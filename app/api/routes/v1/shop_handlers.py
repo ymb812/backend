@@ -1,6 +1,6 @@
 import logging
 from fastapi import APIRouter, HTTPException, Header, Depends, status
-from api.schemas.v1.web_shop import WebShopModel, WebShopToBeUpdatedModel, WebShopStaticContentModel
+from api.schemas.v1.web_shop import WebShopModel, WebShopToBeUpdatedModel, WebShopStaticContentModel, WebShopFromDBModel
 from db.models import WebShop
 from configs.settings import env_parameters
 
@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 # create new user
-@router.post('/', status_code=status.HTTP_201_CREATED)
-async def create_shop(user_uuid: str, body: WebShopModel):
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=WebShopModel.Response)
+async def create_shop(user_uuid: str, body: WebShopModel.Request):
     try:
         await WebShop.create(uuid=body.uuid, name=body.name, bot_id=body.bot_id)
 
@@ -30,11 +30,11 @@ async def create_shop(user_uuid: str, body: WebShopModel):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail='Shop is not unique or types are wrong')
 
-    return {'uuid': body.uuid, 'bot_token': bot_token, 'status': 'Shop created successfully.'}
+    return {'uuid': body.uuid, 'status': 'Shop created successfully.'}
 
 
 # delete shop
-@router.delete('/{uuid}', status_code=status.HTTP_200_OK)
+@router.delete('/{uuid}', status_code=status.HTTP_200_OK, response_model=WebShopModel.Response)
 async def delete_shop(user_uuid: str, uuid: str):
     try:
         await WebShop.filter(uuid=uuid).delete()
@@ -46,8 +46,10 @@ async def delete_shop(user_uuid: str, uuid: str):
 
 
 # update shop data
-@router.patch('/{uuid}', status_code=status.HTTP_200_OK)
-async def update_shop(user_uuid: str, uuid: str, body: WebShopToBeUpdatedModel):
+@router.patch('/{uuid}', status_code=status.HTTP_200_OK, response_model=WebShopToBeUpdatedModel.Response,
+              responses={200: {'description': 'Successful Response. '
+                                              'If field in updatedProperties is None, then it may not be updated'}})
+async def update_shop(user_uuid: str, uuid: str, body: WebShopToBeUpdatedModel.Request):
     try:
         shop = await WebShop.get(uuid=uuid)
         await shop.update_fields(updated_fields=body)
@@ -59,7 +61,7 @@ async def update_shop(user_uuid: str, uuid: str, body: WebShopToBeUpdatedModel):
 
 
 # get shop data
-@router.get('/{uuid}', status_code=status.HTTP_200_OK)
+@router.get('/{uuid}', status_code=status.HTTP_200_OK, response_model=WebShopFromDBModel.Response)
 async def get_shop(user_uuid: str, uuid: str):
     try:
         shop = await WebShop.filter(uuid=uuid).first().values()
@@ -71,6 +73,6 @@ async def get_shop(user_uuid: str, uuid: str):
 
 
 # update shop static content
-@router.put('/static', status_code=status.HTTP_200_OK)
-async def update_shop_static_content(user_uuid: str, uuid: str, body: WebShopStaticContentModel):
+@router.put('/static', status_code=status.HTTP_200_OK, response_model=WebShopStaticContentModel.Response)
+async def update_shop_static_content(user_uuid: str, uuid: str, body: WebShopStaticContentModel.Request):
     pass

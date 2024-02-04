@@ -1,20 +1,48 @@
-from pydantic import BaseModel
+import datetime
+from pydantic import BaseModel, UUID4
 
 
-# shop model
-class WebShopModel(BaseModel):
-    uuid: str
-    name: str
-    bot_id: int
+# post request
+class WebShopModel:
+    class Request(BaseModel):
+        uuid: str
+        name: str
+        bot_id: int
+
+    class Response(BaseModel):
+        uuid: str
+        status: str
 
 
-# shop put request
-class WebShopToBeUpdatedModel(BaseModel):
-    name: str | None
-    bot_id: int | None
+class WebShopToBeUpdatedInfoModel(BaseModel):
+    name: str | None = None
+    bot_id: int | None = None
+
+
+# patch request
+class WebShopToBeUpdatedModel:
+    class Request(WebShopToBeUpdatedInfoModel):
+        pass
+
+    class Response(WebShopModel.Response):
+        updatedProperties: WebShopToBeUpdatedInfoModel
+
+
+# get request
+class WebShopFromDBModel:
+    class Response(BaseModel):
+        uuid: UUID4
+        name: str
+        bot_id: int
+        created_at: datetime.datetime
+        updated_at: datetime.datetime
 
 
 # update shop static content
-class WebShopStaticContentModel(BaseModel):
-    uuid: str
+class WebShopStaticContentModel:
     # to be added
+    class Request(BaseModel):
+        uuid: str
+
+    class Response(BaseModel):
+        pass

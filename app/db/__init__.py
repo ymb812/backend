@@ -1,23 +1,7 @@
 import copy
 from configs.settings import env_parameters
 from typing import Dict
-
-
-# 
-# async def init():
-#     await Tortoise.init(
-#         db_url=db_url.format(DB_USERNAME=env_parameters.DB_USERNAME,
-#                              DB_PASSWORD=env_parameters.DB_PASSWORD,
-#                              DB_HOST=env_parameters.DB_HOST,
-#                              DB_PORT=env_parameters.DB_PORT,
-#                              DB_NAME=env_parameters.DB_NAME),
-#         modules={'models': ['db.models']})
-#     await Tortoise.generate_schemas()
-# 
-# 
-# async def close():
-#     await Tortoise.close_connections()
-
+from tortoise import Tortoise
 
 
 conn_mask = 'postgres://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
@@ -33,6 +17,13 @@ config_mask = {
     }
 }
 
+async def start(conn: Dict):
+    await Tortoise.init(config=conn)
+    await Tortoise.generate_schemas()
+
+
+async def teardown():
+    await Tortoise.close_connections()
 
 def get_config(connection) -> Dict:
     config = copy.deepcopy(config_mask)

@@ -24,7 +24,7 @@ class WebUser(Model):
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
 
-    async def update_fields(self, updated_fields: v1_web_user.WebUserToBeUpdatedModel):
+    async def update_fields(self, updated_fields: v1_web_user.WebUserToBeUpdatedModel.Request):
         for field, value in updated_fields.model_dump().items():
             if value is not None:
                 setattr(self, field, value)
@@ -64,7 +64,7 @@ class WebShop(Model):
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
 
-    async def update_fields(self, updated_fields: v1_web_shop.WebShopToBeUpdatedModel):
+    async def update_fields(self, updated_fields: v1_web_shop.WebShopToBeUpdatedModel.Request):
         for field, value in updated_fields.model_dump().items():
             if value is not None:
                 setattr(self, field, value)
@@ -102,7 +102,7 @@ class Product(Model):
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
 
-    async def update_fields(self, updated_fields: v1_product.ProductToBeUpdatedModel):
+    async def update_fields(self, updated_fields: v1_product.ProductToBeUpdatedModel.Request):
         for field, value in updated_fields.model_dump().items():
             if value is not None:
                 setattr(self, field, value)
