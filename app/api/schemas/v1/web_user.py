@@ -16,15 +16,6 @@ class WebUserToBeUpdatedInfoModel(BaseModel):
     email: EmailStr | None = None
 
 
-# user put request
-class WebUserToBeUpdatedModel:
-    class Request(WebUserToBeUpdatedInfoModel):
-        pass
-
-    class Response(WebUserModel.Response):
-        updatedProperties: WebUserToBeUpdatedInfoModel
-
-
 # get request
 class WebUserFromDBModel:
     class Response(BaseModel):
@@ -32,3 +23,13 @@ class WebUserFromDBModel:
         email: EmailStr
         created_at: datetime.datetime
         updated_at: datetime.datetime
+
+
+# user put request
+class WebUserToBeUpdatedModel:
+    class Request(WebUserToBeUpdatedInfoModel):
+        pass
+
+    class Response(BaseModel):
+        status: str
+        data: WebUserFromDBModel.Response

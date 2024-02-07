@@ -30,15 +30,6 @@ class ProductToBeUpdatedInfoModel(BaseModel):
     order_priority: int | None = None
 
 
-# patch request
-class ProductToBeUpdatedModel:
-    class Request(ProductToBeUpdatedInfoModel):
-        pass
-
-    class Response(ProductModel.Response):
-        updatedProperties: ProductToBeUpdatedInfoModel
-
-
 # get request
 class ProductFromDBModel:
     class Response(BaseModel):
@@ -59,3 +50,13 @@ class ProductsByShopModel:
     class Response(BaseModel):
         amount: int
         products: List[ProductFromDBModel.Response]
+
+
+# patch request
+class ProductToBeUpdatedModel:
+    class Request(ProductToBeUpdatedInfoModel):
+        pass
+
+    class Response(BaseModel):
+        status: str
+        data: ProductFromDBModel.Response

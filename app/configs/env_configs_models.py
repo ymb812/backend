@@ -7,6 +7,7 @@ class APPSettings(BaseModel):
 
 class APIConfigsModel(BaseModel):
     X_AUTH_TOKEN: str
+    IDP_BOT_USERNAME_ROUTE: str
 
 
 class DataBaseConfigsModel(BaseModel):

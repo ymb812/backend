@@ -18,15 +18,6 @@ class WebShopToBeUpdatedInfoModel(BaseModel):
     bot_id: int | None = None
 
 
-# patch request
-class WebShopToBeUpdatedModel:
-    class Request(WebShopToBeUpdatedInfoModel):
-        pass
-
-    class Response(WebShopModel.Response):
-        updatedProperties: WebShopToBeUpdatedInfoModel
-
-
 # get request
 class WebShopFromDBModel:
     class Response(BaseModel):
@@ -35,6 +26,16 @@ class WebShopFromDBModel:
         bot_id: int
         created_at: datetime.datetime
         updated_at: datetime.datetime
+
+
+# patch request
+class WebShopToBeUpdatedModel:
+    class Request(WebShopToBeUpdatedInfoModel):
+        pass
+
+    class Response(BaseModel):
+        status: str
+        data: WebShopFromDBModel.Response
 
 
 # update shop static content

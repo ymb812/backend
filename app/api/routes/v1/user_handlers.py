@@ -55,7 +55,7 @@ async def update_user(uuid: str, body: WebUserToBeUpdatedModel.Request):
         logger.error(f'Cannot update WebUser with uuid={uuid}', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='')
 
-    return {'uuid': uuid, 'status': 'User updated successfully.', 'updatedProperties': body.model_dump()}
+    return {'status': 'User updated successfully.', 'data': user}
 
 
 # get user data

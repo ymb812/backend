@@ -1,4 +1,5 @@
 import logging
+import aiohttp
 from uuid import uuid4
 from fastapi import APIRouter, HTTPException, Header, Depends, status
 from api.schemas.v1.web_shop import WebShopModel, WebShopToBeUpdatedModel, WebShopStaticContentModel, WebShopFromDBModel
@@ -17,20 +18,28 @@ router = APIRouter(dependencies=[Depends(authorize_user)])
 logger = logging.getLogger(__name__)
 
 
-# create new user
-@router.post('/', status_code=status.HTTP_201_CREATED, response_model=WebShopModel.Response)
+# create new shop
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=WebShopModel.Response,
+             responses={503: {'description': 'Error in IDP API response'},
+                        500: {'description': 'bot_id is not unique'}})
 async def create_shop(user_uuid: str, body: WebShopModel.Request):
+    # get bot_username from bot manager
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'{env_parameters.IDP_BOT_USERNAME_ROUTE}/{body.bot_id}') as response:
+                response = await response.json(content_type='text')
+                bot_username = response['username']
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail=f'Error with IDP API response: {response}')
+
     try:
         webshop_uuid = uuid4()
-        await WebShop.create(uuid=webshop_uuid, name=body.name, bot_id=body.bot_id)
-
-        # here get bot_token from bot_manager
-        bot_token = 'will_be_received_from_bot_manager'
-
+        await WebShop.create(uuid=webshop_uuid, name=body.name, bot_id=body.bot_id, bot_username=bot_username)
     except Exception as e:
         logger.error(f'Cannot create WebShop via /shop', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail='Shop is not unique or types are wrong')
+                            detail='Bot_id is not unique')
 
     return {'uuid': webshop_uuid, 'status': 'Shop created successfully.'}
 
@@ -59,7 +68,7 @@ async def update_shop(user_uuid: str, uuid: str, body: WebShopToBeUpdatedModel.R
         logger.error(f'Cannot update WebShop with uuid={uuid}', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='')
 
-    return {'uuid': uuid, 'status': 'Shop updated successfully.', 'updatedProperties': body.model_dump()}
+    return {'status': 'Shop updated successfully.', 'data': shop}
 
 
 # get shop data

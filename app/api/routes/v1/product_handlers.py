@@ -59,7 +59,7 @@ async def update_product(uuid: str, user_uuid: str, body: ProductToBeUpdatedMode
         logger.error(f'Cannot update Product with uuid={uuid}', exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='')
 
-    return {'uuid': uuid, 'status': 'Product updated successfully.', 'updatedProperties': body.model_dump()}
+    return {'status': 'Product updated successfully.', 'data': product}
 
 
 # get product data
